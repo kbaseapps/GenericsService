@@ -34,7 +34,6 @@ class GenericsService:
     def __init__(self, config):
         #BEGIN_CONSTRUCTOR
         self.config = config
-        self.config['KB_AUTH_TOKEN'] = os.environ['KB_AUTH_TOKEN']
         self.shared_folder = config['scratch']
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
