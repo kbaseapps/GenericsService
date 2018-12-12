@@ -38,7 +38,6 @@ class GenericsService:
         self.shared_folder = config['scratch']
         logging.basicConfig(format='%(created)s %(levelname)s: %(message)s',
                             level=logging.INFO)
-        self.fetch_utils = Fetch(self.config)
         #END_CONSTRUCTOR
         pass
 
@@ -63,7 +62,8 @@ class GenericsService:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN fetch_data
-        returnVal = self.fetch_utils.fetch_data(params)
+        fetch_utils = Fetch(self.config, ctx)
+        returnVal = fetch_utils.fetch_data(params)
         #END fetch_data
 
         # At some point might do deeper type checking...

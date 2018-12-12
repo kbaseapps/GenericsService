@@ -106,11 +106,10 @@ class Fetch:
 
         return data_matrix
 
-    def __init__(self, config):
+    def __init__(self, config, context):
         self.ws_url = config["workspace-url"]
-        self.token = config['KB_AUTH_TOKEN']
         self.scratch = config['scratch']
-        self.wsClient = workspaceService(self.ws_url, token=self.token)
+        self.wsClient = workspaceService(self.ws_url, token=context['token'])
 
     def fetch_data(self, params):
         """
