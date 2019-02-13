@@ -6,6 +6,7 @@ import shutil
 import time
 import unittest
 from configparser import ConfigParser
+import pandas as pd
 
 from GenericsService.GenericsServiceImpl import GenericsService
 from GenericsService.GenericsServiceServer import MethodContext
@@ -176,28 +177,6 @@ class GenericsServiceTest(unittest.TestCase):
         dfu_oi = cls.dfu.save_objects(save_object_params)[0]
         cls.fitness_matrix_ref = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
 
-        # upload DifferentialExpressionMatrix object
-        object_type = 'KBaseMatrices.DifferentialExpressionMatrix'
-        diff_expr_matrix_object_name = 'test_diff_expr_matrix'
-        diff_expr_matrix_data = {'scale': 'log2',
-                                 'type': 'level',
-                                 'col_attributemapping_ref': cls.attribute_mapping_ref,
-                                 'col_mapping': cls.col_mapping,
-                                 'data': {'row_ids': cls.row_ids,
-                                          'col_ids': cls.col_ids,
-                                          'values': cls.values
-                                          }}
-        save_object_params = {
-            'id': workspace_id,
-            'objects': [{'type': object_type,
-                         'data': diff_expr_matrix_data,
-                         'name': diff_expr_matrix_object_name}]
-        }
-
-        dfu_oi = cls.dfu.save_objects(save_object_params)[0]
-        cls.diff_expr_matrix_ref = str(dfu_oi[6]) + '/' + str(dfu_oi[0]) + '/' + str(dfu_oi[4])
-
-
     @classmethod
     def tearDownClass(cls):
         if hasattr(cls, 'wsName'):
@@ -242,9 +221,11 @@ class GenericsServiceTest(unittest.TestCase):
         returnVal = self.serviceImpl.fetch_data(self.ctx, params)[0]
         self.check_fetch_data_output(returnVal)
 
-        params = {'obj_ref': self.diff_expr_matrix_ref}
+        params = {'obj_ref': self.attribute_mapping_ref}
         returnVal = self.serviceImpl.fetch_data(self.ctx, params)[0]
-        self.check_fetch_data_output(returnVal)
+        self.assertIn('data_matrix', returnVal)
+        df = pd.DataFrame(json.loads(returnVal['data_matrix']))
+        self.assertEqual(df.shape, (3, 3))
 
         params = {'obj_ref': self.expression_matrix_ref,
                   'generics_module': {'data': 'FloatMatrix2D'}}

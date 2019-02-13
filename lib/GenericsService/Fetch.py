@@ -7,7 +7,7 @@ import pandas as pd
 
 from installed_clients.WorkspaceClient import Workspace as workspaceService
 
-GENERICS_TYPE = ['FloatMatrix2D']  # add case in _convert_data for each additional type
+GENERICS_TYPES = ['FloatMatrix2D', 'Attribute']  # add case in convert_data for each additional type
 
 
 class Fetch:
@@ -45,7 +45,7 @@ class Fetch:
         if not obj_type_spec:
             raise ValueError('Cannot retrieve spec for: {}'.format(obj_type))
 
-        generics_types = [generics_type for generics_type in GENERICS_TYPE
+        generics_types = [generics_type for generics_type in GENERICS_TYPES
                           if generics_type in obj_type_spec]
 
         if not generics_types:
@@ -69,7 +69,7 @@ class Fetch:
 
         data_types = list(generics_module.values())
 
-        if not set(GENERICS_TYPE) >= set(data_types):
+        if not set(GENERICS_TYPES) >= set(data_types):
             raise ValueError('Found unknown generics data type in:\n{}\n'.format(data_types))
 
         if data_types == ['FloatMatrix2D']:
@@ -77,6 +77,12 @@ class Fetch:
             values = data[key]['values']
             index = data[key]['row_ids']
             columns = data[key]['col_ids']
+            df = pd.DataFrame(values, index=index, columns=columns)
+        elif data_types == ['Attribute']:
+            print(data)
+            values = data['instances'].values()
+            index = data['instances'].keys()
+            columns = [x['attribute'] for x in data['attributes']]
             df = pd.DataFrame(values, index=index, columns=columns)
         else:
             raise ValueError('Unexpected Data Type: {}'.format(data_types))
@@ -97,12 +103,7 @@ class Fetch:
         if not generics_module:
             generics_module = self._find_generics_type(obj_info[2])
 
-        try:
-            data = {k: v for k, v in obj_data.items() if k in generics_module.keys()}
-        except KeyError:
-            raise ValueError('Retrieved wrong generics type name')
-
-        data_matrix = self._convert_data(data, generics_module)
+        data_matrix = self._convert_data(obj_data, generics_module)
 
         return data_matrix
 
