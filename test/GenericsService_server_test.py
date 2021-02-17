@@ -60,16 +60,16 @@ class GenericsServiceTest(unittest.TestCase):
     def prepare_data(cls):
 
         # upload genome object
-        genbank_file_name = 'minimal.gbff'
-        genbank_file_path = os.path.join(cls.scratch, genbank_file_name)
-        shutil.copy(genbank_file_name, genbank_file_path)
+        # genbank_file_name = 'minimal.gbff'
+        # genbank_file_path = os.path.join(cls.scratch, genbank_file_name)
+        # shutil.copy(genbank_file_name, genbank_file_path)
 
-        genome_object_name = 'test_Genome'
-        cls.genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
-                                                    'workspace_name': cls.wsName,
-                                                    'genome_name': genome_object_name,
-                                                    'generate_ids_if_needed': 1
-                                                    })['genome_ref']
+        # genome_object_name = 'test_Genome'
+        # cls.genome_ref = cls.gfu.genbank_to_genome({'file': {'path': genbank_file_path},
+        #                                             'workspace_name': cls.wsName,
+        #                                             'genome_name': genome_object_name,
+        #                                             'generate_ids_if_needed': 1
+        #                                             })['genome_ref']
 
         # upload AttributeMapping object
         workspace_id = cls.dfu.ws_name_to_id(cls.wsName)
@@ -80,13 +80,16 @@ class GenericsServiceTest(unittest.TestCase):
                                                 'test_instance_3': ['3-1', '3-2', '3-3']},
                                   'attributes': [{'attribute': 'test_attribute_1',
                                                   'attribute_ont_ref': 'attribute_ont_ref_1',
-                                                  'attribute_ont_id': 'attribute_ont_id_1'},
+                                                  'attribute_ont_id': 'attribute_ont_id_1',
+                                                  'source': 'source'},
                                                  {'attribute': 'test_attribute_2',
                                                   'attribute_ont_ref': 'attribute_ont_ref_2',
-                                                  'attribute_ont_id': 'attribute_ont_id_2'},
+                                                  'attribute_ont_id': 'attribute_ont_id_2',
+                                                  'source': 'source'},
                                                  {'attribute': 'test_attribute_3',
                                                   'attribute_ont_ref': 'attribute_ont_ref_3',
-                                                  'attribute_ont_id': 'attribute_ont_id_3'}],
+                                                  'attribute_ont_id': 'attribute_ont_id_3',
+                                                  'source': 'source'}],
                                   'ontology_mapping_method': 'user curation'}
         save_object_params = {
             'id': workspace_id,
@@ -127,8 +130,7 @@ class GenericsServiceTest(unittest.TestCase):
                                   'data': {'row_ids': cls.row_ids,
                                            'col_ids': cls.col_ids,
                                            'values': cls.values
-                                           },
-                                  'genome_ref': cls.genome_ref}
+                                           }}
         save_object_params = {
             'id': workspace_id,
             'objects': [{'type': object_type,
@@ -186,7 +188,7 @@ class GenericsServiceTest(unittest.TestCase):
     def start_test(self):
         testname = inspect.stack()[1][3]
         print('\n*** starting test: ' + testname + ' **')
-            
+
     def fail_fetch_data(self, params, error, exception=ValueError,
                         contains=False):
         with self.assertRaises(exception) as context:
