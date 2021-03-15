@@ -62,8 +62,9 @@ module GenericsService {
   } SelectDataParams;
 
 
-  /* Ouput of the fetch_data function
-    data_matrix: a pandas dataframe in json format
+  /* Ouput of the select_data function
+    data_matrix: a pandas dataframe in json format represeting matrix data
+    attribute_data_matrix: a pandas dataframe in json format represeting associated attribute mapping data
     selected_ids: selected row/col ids
   */
   typedef structure {
