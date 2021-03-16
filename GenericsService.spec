@@ -33,7 +33,7 @@ module GenericsService {
     mapping<string, string> generics_module;
   } FetchDataParams;
 
-  /* Ouput of the fetch_data function
+  /* Output of the fetch_data function
     data_matrix: a pandas dataframe in json format
   */
   typedef structure {
@@ -46,7 +46,7 @@ module GenericsService {
 
   /* Input of the select_data function
     obj_ref: generics object reference
-    query: selects col/row where the value of an attribute field equals vluae in the sepecified array.
+    query: selects col/row where the value of an attribute field equals value in the specified array.
             e.g.
             1. query = {'chemical_type': ['specific']} - selected all rows where associated row attribute mapping has 'specific' value for 'chemical_type' field
             2. query = {'chemical_type': ['specific', 'exometabolite']} - selected all rows where associated row attribute mapping has 'specific' or 'exometabolite' value for 'chemical_type' field
@@ -62,9 +62,9 @@ module GenericsService {
   } SelectDataParams;
 
 
-  /* Ouput of the select_data function
-    data_matrix: a pandas dataframe in json format represeting matrix data
-    attribute_data_matrix: a pandas dataframe in json format represeting associated attribute mapping data
+  /* Output of the select_data function
+    data_matrix: a pandas dataframe in json format representing matrix data
+    attribute_data_matrix: a pandas dataframe in json format representing associated attribute mapping data
     selected_ids: selected row/col ids
   */
   typedef structure {
