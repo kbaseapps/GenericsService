@@ -76,7 +76,7 @@ class GenericsServiceTest(unittest.TestCase):
         object_type = 'KBaseExperiments.AttributeMapping'
         attribute_mapping_object_name = 'test_attribute_mapping'
         attribute_mapping_data = {'instances': {'test_instance_1': ['1-1', '1-2', '1-3'],
-                                                'test_instance_2': ['2-1', '2-2', '2-3'],
+                                                'test_instance_2': ['2-1', '1-2', '2-3'],
                                                 'test_instance_3': ['3-1', '3-2', '3-3']},
                                   'attributes': [{'attribute': 'test_attribute_1',
                                                   'attribute_ont_ref': 'attribute_ont_ref_1',
@@ -233,3 +233,19 @@ class GenericsServiceTest(unittest.TestCase):
                   'generics_module': {'data': 'FloatMatrix2D'}}
         returnVal = self.serviceImpl.fetch_data(self.ctx, params)[0]
         self.check_fetch_data_output(returnVal)
+
+    def test_count_attribute_value(self):
+        self.start_test()
+        params = {'matrix_ref': self.expression_matrix_ref, 'attribute_name': 'test_attribute_1'}
+        returnVal = self.serviceImpl.count_attribute_value(self.ctx, params)[0]
+
+        attributes_count = returnVal['attributes_count']
+        expected_count = {'1-1': 1, '2-1': 1, '3-1': 1}
+        self.assertTrue(attributes_count == expected_count)
+
+        params = {'matrix_ref': self.expression_matrix_ref, 'attribute_name': 'test_attribute_2'}
+        returnVal = self.serviceImpl.count_attribute_value(self.ctx, params)[0]
+
+        attributes_count = returnVal['attributes_count']
+        expected_count = {'1-2': 2, '3-2': 1}
+        self.assertTrue(attributes_count == expected_count)
