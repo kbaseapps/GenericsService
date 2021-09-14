@@ -24,7 +24,7 @@ class GenericsService:
     ######################################### noqa
     VERSION = "0.0.3"
     GIT_URL = "git@github.com:Tianhao-Gu/GenericsService.git"
-    GIT_COMMIT_HASH = "b7de5a47fe32fecea332abea3d19b83d9c3521ad"
+    GIT_COMMIT_HASH = "87dc106cd7d846c5372a8746649d4129938c9416"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -225,13 +225,13 @@ class GenericsService:
            parameter "data" of type "FloatMatrix2D" (A simple 2D matrix of
            values with labels/ids for rows and columns.  The matrix is stored
            as a list of lists, with the outer list containing rows, and the
-           inner lists containing values for each column of that row. 
-           Row/Col ids should be unique. row_ids - unique ids for rows.
-           col_ids - unique ids for columns. values - two dimensional array
-           indexed as: values[row][col] @metadata ws length(row_ids) as
-           n_rows @metadata ws length(col_ids) as n_cols) -> structure:
-           parameter "row_ids" of list of String, parameter "col_ids" of list
-           of String, parameter "values" of list of list of Double
+           inner lists containing values for each column of that row. Row/Col
+           ids should be unique. row_ids - unique ids for rows. col_ids -
+           unique ids for columns. values - two dimensional array indexed as:
+           values[row][col] @metadata ws length(row_ids) as n_rows @metadata
+           ws length(col_ids) as n_cols) -> structure: parameter "row_ids" of
+           list of String, parameter "col_ids" of list of String, parameter
+           "values" of list of list of Double
         """
         # ctx is the context object
         # return variables are: returnVal
@@ -257,7 +257,7 @@ class GenericsService:
            "FloatMatrix2D" (A simple 2D matrix of values with labels/ids for
            rows and columns.  The matrix is stored as a list of lists, with
            the outer list containing rows, and the inner lists containing
-           values for each column of that row.  Row/Col ids should be unique.
+           values for each column of that row. Row/Col ids should be unique.
            row_ids - unique ids for rows. col_ids - unique ids for columns.
            values - two dimensional array indexed as: values[row][col]
            @metadata ws length(row_ids) as n_rows @metadata ws

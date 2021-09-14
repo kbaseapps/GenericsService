@@ -153,7 +153,7 @@ class Fetch:
 
         if not attribute_ref:
             raise ValueError('Matrix object does not have {} attribute mapping object'.format(
-                                                                                        dimension))
+                dimension))
         _, attri_data = self._retrieve_object(attribute_ref)
 
         values = attri_data['instances'].values()
@@ -202,7 +202,7 @@ class Fetch:
 
         if not attribute_ref:
             raise ValueError('Matrix object does not have {} attribute mapping object'.format(
-                                                                                        dimension))
+                dimension))
         _, attri_data = self._retrieve_object(attribute_ref)
 
         values = attri_data['instances'].values()
