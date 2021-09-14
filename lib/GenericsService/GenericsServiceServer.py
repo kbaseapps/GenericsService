@@ -358,10 +358,10 @@ class Application(object):
                              name='GenericsService.fetch_attributes',
                              types=[dict])
         self.method_authentication['GenericsService.fetch_attributes'] = 'required'  # noqa
-        self.rpc_service.add(impl_GenericsService.fetch_data_by_attributes,
-                             name='GenericsService.fetch_data_by_attributes',
+        self.rpc_service.add(impl_GenericsService.fetch_data_by_ids,
+                             name='GenericsService.fetch_data_by_ids',
                              types=[dict])
-        self.method_authentication['GenericsService.fetch_data_by_attributes'] = 'required'  # noqa
+        self.method_authentication['GenericsService.fetch_data_by_ids'] = 'required'  # noqa
         self.rpc_service.add(impl_GenericsService.fetch_all,
                              name='GenericsService.fetch_all',
                              types=[dict])

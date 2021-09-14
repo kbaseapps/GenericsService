@@ -236,16 +236,34 @@ class GenericsServiceTest(unittest.TestCase):
 
     def test_count_attribute_value(self):
         self.start_test()
-        params = {'matrix_ref': self.expression_matrix_ref, 'attribute_name': 'test_attribute_1'}
+        params = {'matrix_ref': self.expression_matrix_ref, 'attribute_name': 'test_attribute_1',
+                  'dimension': 'row'}
         returnVal = self.serviceImpl.count_attribute_value(self.ctx, params)[0]
 
         attributes_count = returnVal['attributes_count']
         expected_count = {'1-1': 1, '2-1': 1, '3-1': 1}
         self.assertTrue(attributes_count == expected_count)
 
-        params = {'matrix_ref': self.expression_matrix_ref, 'attribute_name': 'test_attribute_2'}
+        params = {'matrix_ref': self.expression_matrix_ref, 'attribute_name': 'test_attribute_2',
+                  'dimension': 'row'}
         returnVal = self.serviceImpl.count_attribute_value(self.ctx, params)[0]
 
         attributes_count = returnVal['attributes_count']
         expected_count = {'1-2': 2, '3-2': 1}
         self.assertTrue(attributes_count == expected_count)
+
+    def test_fetch_attributes(self):
+        self.start_test()
+        params = {'matrix_ref': self.expression_matrix_ref,
+                  'ids': ['a', 'test_instance_1', 'test_instance_2'],
+                  'dimension': 'row'}
+        returnVal = self.serviceImpl.fetch_attributes(self.ctx, params)[0]
+
+        attributes = returnVal['attributes']
+        expected_attributes = {'test_instance_1': {'test_attribute_1': '1-1',
+                                                   'test_attribute_2': '1-2',
+                                                   'test_attribute_3': '1-3'},
+                               'test_instance_2': {'test_attribute_1': '2-1',
+                                                   'test_attribute_2': '1-2',
+                                                   'test_attribute_3': '2-3'}}
+        self.assertTrue(attributes == expected_attributes)

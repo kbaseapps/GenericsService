@@ -98,12 +98,12 @@ module GenericsService {
   funcdef select_row_ids(SelectIDParams params) returns(SelectIDReturn returnVal) authentication required;
 
   /*
-    attribute_names: name of each attributes
+    ids: name of row/col ids
     dimension: 'row' or 'col', 'row' by default
   */
   typedef structure {
     obj_ref matrix_ref;
-    list<string> attribute_names;
+    list<string> ids;
     string dimension;
   } FetchAttriParams;
 
@@ -115,18 +115,18 @@ module GenericsService {
     mapping<string, mapping<string, string>> attributes;
   } FetchAttriReturn;
 
-  /* return non-empty attributes for given ides */
+  /* return non-empty attributes for given row/col ids */
   funcdef fetch_attributes(FetchAttriParams params) returns(FetchAttriReturn returnVal) authentication required;
 
   /*
-    row_attribute_names: name of target row attributes. If empty, return all row attributes.
-    col_attribute_names: name of target col attributes. If empty, return all col attributes.
+    row_ids: name of target row ids. If empty, return all row ids.
+    col_ids: name of target col ids. If empty, return all col ids.
   */
   typedef structure {
     obj_ref matrix_ref;
-    list<string> row_attribute_names;
-    list<string> col_attribute_names;
-  } FetchDataByAttriParams;
+    list<string> row_ids;
+    list<string> col_ids;
+  } FetchDataByIDParams;
 
   /*
     A simple 2D matrix of values with labels/ids for rows and
@@ -149,10 +149,10 @@ module GenericsService {
 
   typedef structure {
     FloatMatrix2D data;
-  } FetchDataByAttriReturn;
+  } FetchDataByIDReturn;
 
-  /* return matrix data for specific row/col attributes */
-  funcdef fetch_data_by_attributes(FetchDataByAttriParams params) returns(FetchDataByAttriReturn returnVal) authentication required;
+  /* return matrix data for specific row/col ids */
+  funcdef fetch_data_by_ids(FetchDataByIDParams params) returns(FetchDataByIDReturn returnVal) authentication required;
 
   typedef structure {
     obj_ref matrix_ref;

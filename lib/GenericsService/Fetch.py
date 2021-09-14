@@ -130,6 +130,55 @@ class Fetch:
         self.scratch = config['scratch']
         self.wsClient = workspaceService(self.ws_url, token=context['token'])
 
+    def fetch_attributes(self, params):
+        """
+        arguments:
+        matrix_ref: generics object reference
+        ids: name of row/col ids
+        dimension: 'row' or 'col', 'row' by default
+        """
+        logging.info('--->\nrunning Fetch.fetch_attributes\n'
+                     + 'params:\n{}'.format(json.dumps(params, indent=1)))
+
+        self.validate_params(params, ('matrix_ref', 'ids'),
+                                     ('dimension'))
+
+        matrix_ref = params.get('matrix_ref')
+        ids = params.get('ids')
+        dimension = params.get('dimension', 'row')
+
+        _, matrix_data = self._retrieve_object(matrix_ref)
+
+        attribute_ref = matrix_data.get('{}_attributemapping_ref'.format(dimension))
+
+        if not attribute_ref:
+            raise ValueError('Matrix object does not have {} attribute mapping object'.format(
+                                                                                        dimension))
+        _, attri_data = self._retrieve_object(attribute_ref)
+
+        values = attri_data['instances'].values()
+        index = attri_data['instances'].keys()
+        columns = [x['attribute'] for x in attri_data['attributes']]
+        df = pd.DataFrame(values, index=index, columns=columns)
+
+        inter_ids = df.index.intersection(ids).to_list()
+        if not inter_ids:
+            raise ValueError('Matrix {} ids have no intersection with given IDs'.format(dimension))
+
+        diff = len(ids) - len(inter_ids)
+        if diff:
+            logging.info('Found {} given IDs not included in the matrix {} ids'.format(diff,
+                                                                                       dimension))
+
+        attributes = dict()
+        selected_attri = df.loc[inter_ids]
+        for idx in selected_attri.index:
+            attributes[idx] = selected_attri.loc[idx].to_dict()
+
+        returnVal = {'attributes': attributes}
+
+        return returnVal
+
     def count_attribute_value(self, params):
         """
         arguments:
@@ -137,8 +186,8 @@ class Fetch:
         attribute_name: name of attribute
         dimension: 'row' or 'col', 'row' by default
         """
-        logging.info('--->\nrunning Fetch.count_attribute_value\n' +
-                     'params:\n{}'.format(json.dumps(params, indent=1)))
+        logging.info('--->\nrunning Fetch.count_attribute_value\n'
+                     + 'params:\n{}'.format(json.dumps(params, indent=1)))
 
         self.validate_params(params, ('matrix_ref', 'attribute_name'),
                                      ('dimension'))
@@ -165,8 +214,8 @@ class Fetch:
             raise ValueError('Cannot find {} from attribute mapping {}'.format(attribute_name,
                                                                                attribute_ref))
 
-        value_counts = df[attribute_name].value_counts()
-        returnVal = {'attributes_count': dict(value_counts)}
+        attributes_count = df[attribute_name].value_counts().to_dict()
+        returnVal = {'attributes_count': attributes_count}
 
         return returnVal
 
