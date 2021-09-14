@@ -241,8 +241,8 @@ class Fetch:
         data_matrix: a pandas dataframe in json format
         """
 
-        logging.info('--->\nrunning Fetch.fetch_data\n' +
-                     'params:\n{}'.format(json.dumps(params, indent=1)))
+        logging.info('--->\nrunning Fetch.fetch_data\n'
+                     + 'params:\n{}'.format(json.dumps(params, indent=1)))
 
         for p in ['obj_ref']:
             if p not in params:
