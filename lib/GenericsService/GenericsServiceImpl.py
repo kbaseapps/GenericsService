@@ -236,6 +236,8 @@ class GenericsService:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN fetch_data_by_ids
+        fetch_utils = Fetch(self.config, ctx)
+        returnVal = fetch_utils.fetch_data_by_ids(params)
         #END fetch_data_by_ids
 
         # At some point might do deeper type checking...
@@ -268,6 +270,8 @@ class GenericsService:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN fetch_all
+        fetch_utils = Fetch(self.config, ctx)
+        returnVal = fetch_utils.fetch_all(params)
         #END fetch_all
 
         # At some point might do deeper type checking...

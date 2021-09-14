@@ -4,6 +4,7 @@ import re
 import traceback
 
 import pandas as pd
+import numpy as np
 
 from installed_clients.WorkspaceClient import Workspace as workspaceService
 
@@ -130,6 +131,80 @@ class Fetch:
         self.scratch = config['scratch']
         self.wsClient = workspaceService(self.ws_url, token=context['token'])
 
+    def fetch_all(self, params):
+        """
+        arguments:
+        matrix_ref: generics object reference
+        """
+        logging.info('--->\nrunning Fetch.fetch_all\n'
+                     + 'params:\n{}'.format(json.dumps(params, indent=1)))
+
+        self.validate_params(params, ['matrix_ref'])
+        matrix_ref = params.get('matrix_ref')
+
+        returnVal = self.fetch_data_by_ids({'matrix_ref': matrix_ref})
+        row_attributes = self.fetch_attributes({'matrix_ref': matrix_ref})['attributes']
+        col_attributes = self.fetch_attributes({'matrix_ref': matrix_ref,
+                                                'dimension': 'col'})['attributes']
+
+        returnVal['row_attributes'] = row_attributes
+        returnVal['col_attributes'] = col_attributes
+
+        return returnVal
+
+    def fetch_data_by_ids(self, params):
+        """
+        arguments:
+        matrix_ref: generics object reference
+        row_ids: name of target row ids. If empty, return all row ids.
+        col_ids: name of target col ids. If empty, return all col ids.
+        """
+        logging.info('--->\nrunning Fetch.fetch_data_by_ids\n'
+                     + 'params:\n{}'.format(json.dumps(params, indent=1)))
+
+        self.validate_params(params, ['matrix_ref'], ['row_ids', 'col_ids'])
+
+        matrix_ref = params.get('matrix_ref')
+        row_ids = params.get('row_ids', [])
+        col_ids = params.get('col_ids', [])
+
+        _, matrix_data = self._retrieve_object(matrix_ref)
+
+        values = matrix_data['data']['values']
+        index = matrix_data['data']['row_ids']
+        columns = matrix_data['data']['col_ids']
+        df = pd.DataFrame(values, index=index, columns=columns)
+
+        if not row_ids:
+            inter_row_ids = df.index.to_list()
+        else:
+            inter_row_ids = df.index.intersection(row_ids).to_list()
+        if not inter_row_ids:
+            raise ValueError('Matrix index(row) ids have no intersection with given row_ids')
+        row_diff = len(row_ids) - len(inter_row_ids)
+        if row_diff:
+            logging.info('Found {} given row_ids not included in the matrix row ids'.format(
+                row_diff))
+
+        if not col_ids:
+            inter_col_ids = df.columns.to_list()
+        else:
+            inter_col_ids = df.columns.intersection(col_ids).to_list()
+        if not inter_col_ids:
+            raise ValueError('Matrix index(row) ids have no intersection with given row_ids')
+        col_diff = len(col_ids) - len(inter_col_ids)
+        if col_diff:
+            logging.info('Found {} given row_ids not included in the matrix row ids'.format(
+                col_diff))
+
+        inter_df = df[inter_col_ids].loc[inter_row_ids].replace({np.nan: None})
+
+        returnVal = {'data': {'row_ids': inter_df.index.to_list(),
+                              'col_ids': inter_df.columns.to_list(),
+                              'values': inter_df.values.tolist()}}
+
+        return returnVal
+
     def fetch_attributes(self, params):
         """
         arguments:
@@ -140,11 +215,10 @@ class Fetch:
         logging.info('--->\nrunning Fetch.fetch_attributes\n'
                      + 'params:\n{}'.format(json.dumps(params, indent=1)))
 
-        self.validate_params(params, ('matrix_ref', 'ids'),
-                                     ('dimension'))
+        self.validate_params(params, ['matrix_ref'], ['dimension', 'ids'])
 
         matrix_ref = params.get('matrix_ref')
-        ids = params.get('ids')
+        ids = params.get('ids', [])
         dimension = params.get('dimension', 'row')
 
         _, matrix_data = self._retrieve_object(matrix_ref)
@@ -152,8 +226,9 @@ class Fetch:
         attribute_ref = matrix_data.get('{}_attributemapping_ref'.format(dimension))
 
         if not attribute_ref:
-            raise ValueError('Matrix object does not have {} attribute mapping object'.format(
+            logging.info('Matrix object does not have {} attribute mapping object'.format(
                 dimension))
+            return {'attributes': {}}
         _, attri_data = self._retrieve_object(attribute_ref)
 
         values = attri_data['instances'].values()
@@ -161,7 +236,10 @@ class Fetch:
         columns = [x['attribute'] for x in attri_data['attributes']]
         df = pd.DataFrame(values, index=index, columns=columns)
 
-        inter_ids = df.index.intersection(ids).to_list()
+        if not ids:
+            inter_ids = df.index.to_list()
+        else:
+            inter_ids = df.index.intersection(ids).to_list()
         if not inter_ids:
             raise ValueError('Matrix {} ids have no intersection with given IDs'.format(dimension))
 
@@ -189,8 +267,7 @@ class Fetch:
         logging.info('--->\nrunning Fetch.count_attribute_value\n'
                      + 'params:\n{}'.format(json.dumps(params, indent=1)))
 
-        self.validate_params(params, ('matrix_ref', 'attribute_name'),
-                                     ('dimension'))
+        self.validate_params(params, ['matrix_ref', 'attribute_name'], ['dimension'])
 
         matrix_ref = params.get('matrix_ref')
         attribute_name = params.get('attribute_name')

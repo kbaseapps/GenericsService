@@ -122,8 +122,8 @@ class GenericsServiceTest(unittest.TestCase):
         expression_matrix_object_name = 'test_expression_matrix'
         expression_matrix_data = {'scale': 'log2',
                                   'type': 'level',
-                                  'col_attributemapping_ref': cls.attribute_mapping_ref,
-                                  'col_mapping': cls.col_mapping,
+                                  # 'col_attributemapping_ref': cls.attribute_mapping_ref,
+                                  # 'col_mapping': cls.col_mapping,
                                   'row_attributemapping_ref': cls.attribute_mapping_ref,
                                   'row_mapping': cls.row_mapping,
                                   'feature_mapping': cls.feature_mapping,
@@ -267,3 +267,52 @@ class GenericsServiceTest(unittest.TestCase):
                                                    'test_attribute_2': '1-2',
                                                    'test_attribute_3': '2-3'}}
         self.assertTrue(attributes == expected_attributes)
+
+    def test_fetch_data_by_ids(self):
+        self.start_test()
+        params = {'matrix_ref': self.expression_matrix_ref}
+        returnVal = self.serviceImpl.fetch_data_by_ids(self.ctx, params)[0]
+        data = returnVal['data']
+
+        expected_data = {'row_ids': ['WRI_RS00050_CDS_1', 'WRI_RS00065_CDS_1', 'WRI_RS00070_CDS_1'],
+                         'col_ids': ['instance_1', 'instance_2', 'instance_3', 'instance_4'],
+                         'values': [[0.1, 0.2, 0.3, 0.4],
+                                    [0.3, 0.4, 0.5, 0.6],
+                                    [None, None, None, None]]}
+
+        self.assertTrue(data == expected_data)
+
+        params = {'matrix_ref': self.expression_matrix_ref,
+                  'row_ids': ['WRI_RS00050_CDS_1', 'WRI_RS00065_CDS_1'],
+                  'col_ids': ['instance_1', 'instance_2']}
+        returnVal = self.serviceImpl.fetch_data_by_ids(self.ctx, params)[0]
+        data = returnVal['data']
+
+        expected_data = {'row_ids': ['WRI_RS00050_CDS_1', 'WRI_RS00065_CDS_1'],
+                         'col_ids': ['instance_1', 'instance_2'],
+                         'values': [[0.1, 0.2],
+                                    [0.3, 0.4]]}
+
+        self.assertTrue(data == expected_data)
+
+    def test_fetch_all(self):
+        self.start_test()
+        params = {'matrix_ref': self.expression_matrix_ref}
+        returnVal = self.serviceImpl.fetch_all(self.ctx, params)[0]
+
+        expected_data = {'data': {'row_ids': ['WRI_RS00050_CDS_1', 'WRI_RS00065_CDS_1', 'WRI_RS00070_CDS_1'],
+                                  'col_ids': ['instance_1', 'instance_2', 'instance_3', 'instance_4'],
+                                  'values': [[0.1, 0.2, 0.3, 0.4],
+                                             [0.3, 0.4, 0.5, 0.6],
+                                             [None, None, None, None]]},
+                         'row_attributes': {'test_instance_1': {'test_attribute_1': '1-1',
+                                                                'test_attribute_2': '1-2',
+                                                                'test_attribute_3': '1-3'},
+                                            'test_instance_2': {'test_attribute_1': '2-1',
+                                                                'test_attribute_2': '1-2',
+                                                                'test_attribute_3': '2-3'},
+                                            'test_instance_3': {'test_attribute_1': '3-1',
+                                                                'test_attribute_2': '3-2',
+                                                                'test_attribute_3': '3-3'}},
+                         'col_attributes': {}}
+        self.assertTrue(returnVal == expected_data)

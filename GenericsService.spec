@@ -98,7 +98,7 @@ module GenericsService {
   funcdef select_row_ids(SelectIDParams params) returns(SelectIDReturn returnVal) authentication required;
 
   /*
-    ids: name of row/col ids
+    ids: name of row/col ids. If empty, return all row ids.
     dimension: 'row' or 'col', 'row' by default
   */
   typedef structure {
