@@ -2,7 +2,6 @@
 import inspect
 import json
 import os
-import shutil
 import time
 import unittest
 from configparser import ConfigParser
@@ -274,7 +273,9 @@ class GenericsServiceTest(unittest.TestCase):
         returnVal = self.serviceImpl.fetch_data_by_ids(self.ctx, params)[0]
         data = returnVal['data']
 
-        expected_data = {'row_ids': ['WRI_RS00050_CDS_1', 'WRI_RS00065_CDS_1', 'WRI_RS00070_CDS_1'],
+        expected_data = {'row_ids': ['WRI_RS00050_CDS_1',
+                                     'WRI_RS00065_CDS_1',
+                                     'WRI_RS00070_CDS_1'],
                          'col_ids': ['instance_1', 'instance_2', 'instance_3', 'instance_4'],
                          'values': [[0.1, 0.2, 0.3, 0.4],
                                     [0.3, 0.4, 0.5, 0.6],
@@ -300,8 +301,11 @@ class GenericsServiceTest(unittest.TestCase):
         params = {'matrix_ref': self.expression_matrix_ref}
         returnVal = self.serviceImpl.fetch_all(self.ctx, params)[0]
 
-        expected_data = {'data': {'row_ids': ['WRI_RS00050_CDS_1', 'WRI_RS00065_CDS_1', 'WRI_RS00070_CDS_1'],
-                                  'col_ids': ['instance_1', 'instance_2', 'instance_3', 'instance_4'],
+        expected_data = {'data': {'row_ids': ['WRI_RS00050_CDS_1',
+                                              'WRI_RS00065_CDS_1',
+                                              'WRI_RS00070_CDS_1'],
+                                  'col_ids': ['instance_1', 'instance_2',
+                                              'instance_3', 'instance_4'],
                                   'values': [[0.1, 0.2, 0.3, 0.4],
                                              [0.3, 0.4, 0.5, 0.6],
                                              [None, None, None, None]]},
