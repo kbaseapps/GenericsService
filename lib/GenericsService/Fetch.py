@@ -145,12 +145,14 @@ class Fetch:
 
     def _select_id_from_attri(self, attri_df, query):
 
+        # set True for all index
         condition = pd.Series([True] * len(attri_df.index), index=attri_df.index)
 
         for attri_name in query:
             condition = condition & attri_df[attri_name].isin(query[attri_name])
 
-        selected_idx = condition[condition]
+        # select index with True value
+        selected_idx = condition[condition].index.to_list()
 
         return selected_idx
 

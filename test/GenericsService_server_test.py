@@ -320,3 +320,22 @@ class GenericsServiceTest(unittest.TestCase):
                                                                 'test_attribute_3': '3-3'}},
                          'col_attributes': {}}
         self.assertTrue(returnVal == expected_data)
+
+    def test_select_row_ids(self):
+        self.start_test()
+        params = {'matrix_ref': self.expression_matrix_ref,
+                  'row_attribute_query': {'test_attribute_2': ['1-2']}}
+        returnVal = self.serviceImpl.select_row_ids(self.ctx, params)[0]
+        selected_ids = returnVal['ids']
+        expected_ids = ['test_instance_1', 'test_instance_2']
+
+        self.assertCountEqual(selected_ids, expected_ids)
+
+        params = {'matrix_ref': self.expression_matrix_ref,
+                  'row_attribute_query': {'test_attribute_1': ['2-1', '3-1'],
+                                          'test_attribute_2': ['1-2']}}
+        returnVal = self.serviceImpl.select_row_ids(self.ctx, params)[0]
+        selected_ids = returnVal['ids']
+        expected_ids = ['test_instance_2']
+
+        self.assertCountEqual(selected_ids, expected_ids)
