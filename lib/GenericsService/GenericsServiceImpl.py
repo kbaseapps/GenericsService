@@ -132,6 +132,8 @@ class GenericsService:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN select_col_ids
+        fetch_utils = Fetch(self.config, ctx)
+        returnVal = fetch_utils.select_col_ids(params)
         #END select_col_ids
 
         # At some point might do deeper type checking...
@@ -176,6 +178,8 @@ class GenericsService:
         # ctx is the context object
         # return variables are: returnVal
         #BEGIN select_row_ids
+        fetch_utils = Fetch(self.config, ctx)
+        returnVal = fetch_utils.select_row_ids(params)
         #END select_row_ids
 
         # At some point might do deeper type checking...

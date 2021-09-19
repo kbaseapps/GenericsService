@@ -112,6 +112,23 @@ class Fetch:
 
         return obj_info, obj_data
 
+    def _retrieve_attribute(self, matrix_data, dimension):
+        logging.info('Start retrieving {} attribute from Matrix'.format(dimension))
+
+        attribute_ref = matrix_data.get('{}_attributemapping_ref'.format(dimension))
+
+        if not attribute_ref:
+            raise ValueError('Matrix object does not have {} attribute mapping object'.format(
+                dimension))
+        _, attri_data = self._retrieve_object(attribute_ref)
+
+        values = attri_data['instances'].values()
+        index = attri_data['instances'].keys()
+        columns = [x['attribute'] for x in attri_data['attributes']]
+        df = pd.DataFrame(values, index=index, columns=columns)
+
+        return df
+
     @staticmethod
     def validate_params(params, expected, opt_param=set()):
         """Validates that required parameters are present. Warns if unexpected parameters appear"""
@@ -126,10 +143,67 @@ class Fetch:
             if param not in defined_param:
                 logging.warning("Unexpected parameter {} supplied".format(param))
 
+    def _select_id_from_attri(self, attri_df, query):
+
+        condition = pd.Series([True] * len(attri_df.index), index=attri_df.index)
+
+        for attri_name in query:
+            condition = condition & attri_df[attri_name].isin(query[attri_name])
+
+        selected_idx = condition[condition]
+
+        return selected_idx
+
     def __init__(self, config, context):
         self.ws_url = config["workspace-url"]
         self.scratch = config['scratch']
         self.wsClient = workspaceService(self.ws_url, token=context['token'])
+
+    def select_row_ids(self, params):
+        """
+        arguments:
+        matrix_ref: generics object reference
+        row_attribute_query
+
+        optional:
+        col_attribute_query
+        """
+
+        self.validate_params(params, ['matrix_ref', 'row_attribute_query'],
+                             ['col_attribute_query'])
+        matrix_ref = params.get('matrix_ref')
+        row_attribute_query = params.get('row_attribute_query', {})
+        col_attribute_query = params.get('col_attribute_query', {})
+
+        _, matrix_data = self._retrieve_object(matrix_ref)
+        row_attri_df = self._retrieve_attribute(matrix_data, 'row')
+        selcted_row_ids = self._select_id_from_attri(row_attri_df, row_attribute_query)
+
+        if not col_attribute_query:
+            return {'ids': selcted_row_ids}
+
+    def select_col_ids(self, params):
+        """
+        arguments:
+        matrix_ref: generics object reference
+        col_attribute_query
+
+        optional:
+        row_attribute_query
+        """
+
+        self.validate_params(params, ['matrix_ref', 'col_attribute_query'],
+                             ['row_attribute_query'])
+        matrix_ref = params.get('matrix_ref')
+        row_attribute_query = params.get('row_attribute_query', {})
+        col_attribute_query = params.get('col_attribute_query', {})
+
+        _, matrix_data = self._retrieve_object(matrix_ref)
+        col_attri_df = self._retrieve_attribute(matrix_data, 'col')
+        selcted_col_ids = self._select_id_from_attri(col_attri_df, col_attribute_query)
+
+        if not row_attribute_query:
+            return {'ids': selcted_col_ids}
 
     def fetch_all(self, params):
         """
@@ -274,22 +348,11 @@ class Fetch:
         dimension = params.get('dimension', 'row')
 
         _, matrix_data = self._retrieve_object(matrix_ref)
-
-        attribute_ref = matrix_data.get('{}_attributemapping_ref'.format(dimension))
-
-        if not attribute_ref:
-            raise ValueError('Matrix object does not have {} attribute mapping object'.format(
-                dimension))
-        _, attri_data = self._retrieve_object(attribute_ref)
-
-        values = attri_data['instances'].values()
-        index = attri_data['instances'].keys()
-        columns = [x['attribute'] for x in attri_data['attributes']]
-        df = pd.DataFrame(values, index=index, columns=columns)
+        df = self._retrieve_attribute(matrix_data, dimension)
 
         if attribute_name not in df:
-            raise ValueError('Cannot find {} from attribute mapping {}'.format(attribute_name,
-                                                                               attribute_ref))
+            raise ValueError('Cannot find {} from {} attribute mapping'.format(attribute_name,
+                                                                               dimension))
 
         attributes_count = df[attribute_name].value_counts().to_dict()
         returnVal = {'attributes_count': attributes_count}
