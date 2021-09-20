@@ -2,7 +2,6 @@
 import inspect
 import json
 import os
-import shutil
 import time
 import unittest
 from configparser import ConfigParser
@@ -76,7 +75,7 @@ class GenericsServiceTest(unittest.TestCase):
         object_type = 'KBaseExperiments.AttributeMapping'
         attribute_mapping_object_name = 'test_attribute_mapping'
         attribute_mapping_data = {'instances': {'test_instance_1': ['1-1', '1-2', '1-3'],
-                                                'test_instance_2': ['2-1', '2-2', '2-3'],
+                                                'test_instance_2': ['2-1', '1-2', '2-3'],
                                                 'test_instance_3': ['3-1', '3-2', '3-3']},
                                   'attributes': [{'attribute': 'test_attribute_1',
                                                   'attribute_ont_ref': 'attribute_ont_ref_1',
@@ -122,8 +121,8 @@ class GenericsServiceTest(unittest.TestCase):
         expression_matrix_object_name = 'test_expression_matrix'
         expression_matrix_data = {'scale': 'log2',
                                   'type': 'level',
-                                  'col_attributemapping_ref': cls.attribute_mapping_ref,
-                                  'col_mapping': cls.col_mapping,
+                                  # 'col_attributemapping_ref': cls.attribute_mapping_ref,
+                                  # 'col_mapping': cls.col_mapping,
                                   'row_attributemapping_ref': cls.attribute_mapping_ref,
                                   'row_mapping': cls.row_mapping,
                                   'feature_mapping': cls.feature_mapping,
@@ -233,3 +232,139 @@ class GenericsServiceTest(unittest.TestCase):
                   'generics_module': {'data': 'FloatMatrix2D'}}
         returnVal = self.serviceImpl.fetch_data(self.ctx, params)[0]
         self.check_fetch_data_output(returnVal)
+
+    def test_count_attribute_value(self):
+        self.start_test()
+        params = {'matrix_ref': self.expression_matrix_ref, 'attribute_name': 'test_attribute_1',
+                  'dimension': 'row'}
+        returnVal = self.serviceImpl.count_attribute_value(self.ctx, params)[0]
+
+        attributes_count = returnVal['attributes_count']
+        expected_count = {'1-1': 1, '2-1': 1, '3-1': 1}
+        self.assertTrue(attributes_count == expected_count)
+
+        params = {'matrix_ref': self.expression_matrix_ref, 'attribute_name': 'test_attribute_2',
+                  'dimension': 'row'}
+        returnVal = self.serviceImpl.count_attribute_value(self.ctx, params)[0]
+
+        attributes_count = returnVal['attributes_count']
+        expected_count = {'1-2': 2, '3-2': 1}
+        self.assertTrue(attributes_count == expected_count)
+
+    def test_fetch_attributes(self):
+        self.start_test()
+        params = {'matrix_ref': self.expression_matrix_ref,
+                  'ids': ['a', 'test_instance_1', 'test_instance_2'],
+                  'dimension': 'row'}
+        returnVal = self.serviceImpl.fetch_attributes(self.ctx, params)[0]
+
+        attributes = returnVal['attributes']
+        expected_attributes = {'test_instance_1': {'test_attribute_1': '1-1',
+                                                   'test_attribute_2': '1-2',
+                                                   'test_attribute_3': '1-3'},
+                               'test_instance_2': {'test_attribute_1': '2-1',
+                                                   'test_attribute_2': '1-2',
+                                                   'test_attribute_3': '2-3'}}
+        self.assertTrue(attributes == expected_attributes)
+
+    def test_fetch_data_by_ids(self):
+        self.start_test()
+        params = {'matrix_ref': self.expression_matrix_ref}
+        returnVal = self.serviceImpl.fetch_data_by_ids(self.ctx, params)[0]
+        data = returnVal['data']
+
+        expected_data = {'row_ids': ['WRI_RS00050_CDS_1',
+                                     'WRI_RS00065_CDS_1',
+                                     'WRI_RS00070_CDS_1'],
+                         'col_ids': ['instance_1', 'instance_2', 'instance_3', 'instance_4'],
+                         'values': [[0.1, 0.2, 0.3, 0.4],
+                                    [0.3, 0.4, 0.5, 0.6],
+                                    [None, None, None, None]]}
+
+        self.assertTrue(data == expected_data)
+
+        params = {'matrix_ref': self.expression_matrix_ref,
+                  'row_ids': ['WRI_RS00050_CDS_1', 'WRI_RS00065_CDS_1'],
+                  'col_ids': ['instance_1', 'instance_2']}
+        returnVal = self.serviceImpl.fetch_data_by_ids(self.ctx, params)[0]
+        data = returnVal['data']
+
+        expected_data = {'row_ids': ['WRI_RS00050_CDS_1', 'WRI_RS00065_CDS_1'],
+                         'col_ids': ['instance_1', 'instance_2'],
+                         'values': [[0.1, 0.2],
+                                    [0.3, 0.4]]}
+
+        self.assertTrue(data == expected_data)
+
+    def test_fetch_all(self):
+        self.start_test()
+        params = {'matrix_ref': self.expression_matrix_ref}
+        returnVal = self.serviceImpl.fetch_all(self.ctx, params)[0]
+
+        expected_data = {'data': {'row_ids': ['WRI_RS00050_CDS_1',
+                                              'WRI_RS00065_CDS_1',
+                                              'WRI_RS00070_CDS_1'],
+                                  'col_ids': ['instance_1', 'instance_2',
+                                              'instance_3', 'instance_4'],
+                                  'values': [[0.1, 0.2, 0.3, 0.4],
+                                             [0.3, 0.4, 0.5, 0.6],
+                                             [None, None, None, None]]},
+                         'row_attributes': {'test_instance_1': {'test_attribute_1': '1-1',
+                                                                'test_attribute_2': '1-2',
+                                                                'test_attribute_3': '1-3'},
+                                            'test_instance_2': {'test_attribute_1': '2-1',
+                                                                'test_attribute_2': '1-2',
+                                                                'test_attribute_3': '2-3'},
+                                            'test_instance_3': {'test_attribute_1': '3-1',
+                                                                'test_attribute_2': '3-2',
+                                                                'test_attribute_3': '3-3'}},
+                         'col_attributes': {}}
+        self.assertTrue(returnVal == expected_data)
+
+    def test_select_row_ids(self):
+        self.start_test()
+        params = {'matrix_ref': self.expression_matrix_ref,
+                  'row_attribute_query': {'test_attribute_2': ['1-2']}}
+        returnVal = self.serviceImpl.select_row_ids(self.ctx, params)[0]
+        selected_ids = returnVal['ids']
+        expected_ids = ['test_instance_1', 'test_instance_2']
+
+        self.assertCountEqual(selected_ids, expected_ids)
+
+        params = {'matrix_ref': self.expression_matrix_ref,
+                  'row_attribute_query': {'test_attribute_1': ['2-1', '3-1'],
+                                          'test_attribute_2': ['1-2']}}
+        returnVal = self.serviceImpl.select_row_ids(self.ctx, params)[0]
+        selected_ids = returnVal['ids']
+        expected_ids = ['test_instance_2']
+
+        self.assertCountEqual(selected_ids, expected_ids)
+
+        params = {'matrix_ref': self.expression_matrix_ref}
+        returnVal = self.serviceImpl.select_row_ids(self.ctx, params)[0]
+        selected_ids = returnVal['ids']
+        expected_ids = ['WRI_RS00050_CDS_1', 'WRI_RS00065_CDS_1', 'WRI_RS00070_CDS_1']
+
+        self.assertCountEqual(selected_ids, expected_ids)
+
+        with self.assertRaises(ValueError) as context:
+            params = {'matrix_ref': self.expression_matrix_ref,
+                      'row_attribute_query': {'test_attribute_4': ['2-1', '3-1']}}
+            self.serviceImpl.select_row_ids(self.ctx, params)[0]
+            self.assertIn('Attribute does not contain test_attribute_4',
+                          str(context.exception.args))
+
+    def test_select_col_ids(self):
+        with self.assertRaises(ValueError) as context:
+            params = {'matrix_ref': self.expression_matrix_ref,
+                      'col_attribute_query': {'fake_col_attri': ['a']}}
+            self.serviceImpl.select_col_ids(self.ctx, params)[0]
+            self.assertIn('Matrix object does not have col attribute mapping object',
+                          str(context.exception.args))
+
+        params = {'matrix_ref': self.expression_matrix_ref}
+        returnVal = self.serviceImpl.select_col_ids(self.ctx, params)[0]
+        selected_ids = returnVal['ids']
+        expected_ids = ['instance_1', 'instance_2', 'instance_3', 'instance_4']
+
+        self.assertCountEqual(selected_ids, expected_ids)

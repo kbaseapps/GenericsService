@@ -342,6 +342,30 @@ class Application(object):
                              name='GenericsService.fetch_data',
                              types=[dict])
         self.method_authentication['GenericsService.fetch_data'] = 'required'  # noqa
+        self.rpc_service.add(impl_GenericsService.count_attribute_value,
+                             name='GenericsService.count_attribute_value',
+                             types=[dict])
+        self.method_authentication['GenericsService.count_attribute_value'] = 'required'  # noqa
+        self.rpc_service.add(impl_GenericsService.select_col_ids,
+                             name='GenericsService.select_col_ids',
+                             types=[dict])
+        self.method_authentication['GenericsService.select_col_ids'] = 'required'  # noqa
+        self.rpc_service.add(impl_GenericsService.select_row_ids,
+                             name='GenericsService.select_row_ids',
+                             types=[dict])
+        self.method_authentication['GenericsService.select_row_ids'] = 'required'  # noqa
+        self.rpc_service.add(impl_GenericsService.fetch_attributes,
+                             name='GenericsService.fetch_attributes',
+                             types=[dict])
+        self.method_authentication['GenericsService.fetch_attributes'] = 'required'  # noqa
+        self.rpc_service.add(impl_GenericsService.fetch_data_by_ids,
+                             name='GenericsService.fetch_data_by_ids',
+                             types=[dict])
+        self.method_authentication['GenericsService.fetch_data_by_ids'] = 'required'  # noqa
+        self.rpc_service.add(impl_GenericsService.fetch_all,
+                             name='GenericsService.fetch_all',
+                             types=[dict])
+        self.method_authentication['GenericsService.fetch_all'] = 'required'  # noqa
         self.rpc_service.add(impl_GenericsService.status,
                              name='GenericsService.status',
                              types=[dict])
