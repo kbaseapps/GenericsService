@@ -149,6 +149,8 @@ class Fetch:
         condition = pd.Series([True] * len(attri_df.index), index=attri_df.index)
 
         for attri_name in query:
+            if attri_name not in attri_df:
+                raise ValueError('Attribute does not contain {}'.format(attri_name))
             condition = condition & attri_df[attri_name].isin(query[attri_name])
 
         # select index with True value
@@ -171,17 +173,36 @@ class Fetch:
         col_attribute_query
         """
 
-        self.validate_params(params, ['matrix_ref', 'row_attribute_query'],
-                             ['col_attribute_query'])
+        self.validate_params(params, ['matrix_ref'],
+                             ['col_attribute_query', 'row_attribute_query'])
         matrix_ref = params.get('matrix_ref')
         row_attribute_query = params.get('row_attribute_query', {})
         col_attribute_query = params.get('col_attribute_query', {})
 
         _, matrix_data = self._retrieve_object(matrix_ref)
-        row_attri_df = self._retrieve_attribute(matrix_data, 'row')
-        selcted_row_ids = self._select_id_from_attri(row_attri_df, row_attribute_query)
+
+        if row_attribute_query:
+            row_attri_df = self._retrieve_attribute(matrix_data, 'row')
+            selcted_row_ids = self._select_id_from_attri(row_attri_df, row_attribute_query)
+        else:
+            selcted_row_ids = matrix_data['data']['row_ids']
 
         if not col_attribute_query:
+            return {'ids': selcted_row_ids}
+        else:
+            col_attri_df = self._retrieve_attribute(matrix_data, 'col')
+            selcted_col_ids = self._select_id_from_attri(col_attri_df, col_attribute_query)
+
+            values = matrix_data['data']['values']
+            index = matrix_data['data']['row_ids']
+            columns = matrix_data['data']['col_ids']
+            df = pd.DataFrame(values, index=index, columns=columns)
+
+            inter_df = df[selcted_col_ids].loc[selcted_row_ids].replace({np.nan: None})
+
+            all_nan_row = inter_df.isnull().all(axis=1)
+            selcted_row_ids = all_nan_row[~all_nan_row].index.to_list()
+
             return {'ids': selcted_row_ids}
 
     def select_col_ids(self, params):
@@ -194,17 +215,36 @@ class Fetch:
         row_attribute_query
         """
 
-        self.validate_params(params, ['matrix_ref', 'col_attribute_query'],
-                             ['row_attribute_query'])
+        self.validate_params(params, ['matrix_ref'],
+                             ['row_attribute_query', 'col_attribute_query'])
         matrix_ref = params.get('matrix_ref')
         row_attribute_query = params.get('row_attribute_query', {})
         col_attribute_query = params.get('col_attribute_query', {})
 
         _, matrix_data = self._retrieve_object(matrix_ref)
-        col_attri_df = self._retrieve_attribute(matrix_data, 'col')
-        selcted_col_ids = self._select_id_from_attri(col_attri_df, col_attribute_query)
+
+        if col_attribute_query:
+            col_attri_df = self._retrieve_attribute(matrix_data, 'col')
+            selcted_col_ids = self._select_id_from_attri(col_attri_df, col_attribute_query)
+        else:
+            selcted_col_ids = matrix_data['data']['col_ids']
 
         if not row_attribute_query:
+            return {'ids': selcted_col_ids}
+        else:
+            row_attri_df = self._retrieve_attribute(matrix_data, 'row')
+            selcted_row_ids = self._select_id_from_attri(row_attri_df, row_attribute_query)
+
+            values = matrix_data['data']['values']
+            index = matrix_data['data']['row_ids']
+            columns = matrix_data['data']['col_ids']
+            df = pd.DataFrame(values, index=index, columns=columns)
+
+            inter_df = df[selcted_col_ids].loc[selcted_row_ids].replace({np.nan: None})
+
+            all_nan_col = inter_df.isnull().all(axis=0)
+            selcted_col_ids = all_nan_col[~all_nan_col].index.to_list()
+
             return {'ids': selcted_col_ids}
 
     def fetch_all(self, params):

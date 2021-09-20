@@ -339,3 +339,32 @@ class GenericsServiceTest(unittest.TestCase):
         expected_ids = ['test_instance_2']
 
         self.assertCountEqual(selected_ids, expected_ids)
+
+        params = {'matrix_ref': self.expression_matrix_ref}
+        returnVal = self.serviceImpl.select_row_ids(self.ctx, params)[0]
+        selected_ids = returnVal['ids']
+        expected_ids = ['WRI_RS00050_CDS_1', 'WRI_RS00065_CDS_1', 'WRI_RS00070_CDS_1']
+
+        self.assertCountEqual(selected_ids, expected_ids)
+
+        with self.assertRaises(ValueError) as context:
+            params = {'matrix_ref': self.expression_matrix_ref,
+                      'row_attribute_query': {'test_attribute_4': ['2-1', '3-1']}}
+            self.serviceImpl.select_row_ids(self.ctx, params)[0]
+            self.assertIn('Attribute does not contain test_attribute_4',
+                          str(context.exception.args))
+
+    def test_select_col_ids(self):
+        with self.assertRaises(ValueError) as context:
+            params = {'matrix_ref': self.expression_matrix_ref,
+                      'col_attribute_query': {'fake_col_attri': ['a']}}
+            self.serviceImpl.select_col_ids(self.ctx, params)[0]
+            self.assertIn('Matrix object does not have col attribute mapping object',
+                          str(context.exception.args))
+
+        params = {'matrix_ref': self.expression_matrix_ref}
+        returnVal = self.serviceImpl.select_col_ids(self.ctx, params)[0]
+        selected_ids = returnVal['ids']
+        expected_ids = ['instance_1', 'instance_2', 'instance_3', 'instance_4']
+
+        self.assertCountEqual(selected_ids, expected_ids)
