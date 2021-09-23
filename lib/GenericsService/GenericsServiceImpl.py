@@ -24,7 +24,7 @@ class GenericsService:
     ######################################### noqa
     VERSION = "0.0.3"
     GIT_URL = "git@github.com:Tianhao-Gu/GenericsService.git"
-    GIT_COMMIT_HASH = "87dc106cd7d846c5372a8746649d4129938c9416"
+    GIT_COMMIT_HASH = "e3f843b063f6494d6851cd06fdc3eec42e9a025c"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
@@ -193,10 +193,10 @@ class GenericsService:
         """
         return non-empty attributes for given row/col ids
         :param params: instance of type "FetchAttriParams" (ids: name of
-           row/col ids dimension: 'row' or 'col', 'row' by default) ->
-           structure: parameter "matrix_ref" of type "obj_ref" (An X/Y/Z
-           style reference), parameter "ids" of list of String, parameter
-           "dimension" of String
+           row/col ids. If empty, return all row ids. dimension: 'row' or
+           'col', 'row' by default) -> structure: parameter "matrix_ref" of
+           type "obj_ref" (An X/Y/Z style reference), parameter "ids" of list
+           of String, parameter "dimension" of String
         :returns: instance of type "FetchAttriReturn" (attributes in dict
            format e.g. {'PB-Low-5': {'IGSN': 'IEAWH0001'}}) -> structure:
            parameter "attributes" of mapping from String to mapping from
