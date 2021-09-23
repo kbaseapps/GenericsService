@@ -22,9 +22,9 @@ class GenericsService:
     # state. A method could easily clobber the state set by another while
     # the latter method is running.
     ######################################### noqa
-    VERSION = "0.0.3"
+    VERSION = "1.0.0"
     GIT_URL = "git@github.com:Tianhao-Gu/GenericsService.git"
-    GIT_COMMIT_HASH = "e3f843b063f6494d6851cd06fdc3eec42e9a025c"
+    GIT_COMMIT_HASH = "97749921840a75dddeba9d2332aa743b5278bc1f"
 
     #BEGIN_CLASS_HEADER
     #END_CLASS_HEADER
